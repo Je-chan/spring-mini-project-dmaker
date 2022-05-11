@@ -1,5 +1,6 @@
 package com.example.dmaker.service;
 
+import com.example.dmaker.dto.CreateDeveloper;
 import com.example.dmaker.entity.Developer;
 import com.example.dmaker.repository.DeveloperRepository;
 import com.example.dmaker.type.DeveloperLevel;
@@ -29,7 +30,7 @@ public class DMakerService {
     private final DeveloperRepository developerRepository;
 
     @Transactional
-    public void createDeveloper () {
+    public void createDeveloper(CreateDeveloper.Request request) {
         Developer developer = Developer.builder()
                 .developerLevel(DeveloperLevel.JUNIOR)
                 .developerSkillType(DeveloperSkillType.FRONT_END)
