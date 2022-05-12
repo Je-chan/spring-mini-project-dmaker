@@ -2,6 +2,8 @@ package com.example.dmaker.service;
 
 import com.example.dmaker.dto.CreateDeveloper;
 import com.example.dmaker.entity.Developer;
+import com.example.dmaker.exception.DMakerErrorCode;
+import com.example.dmaker.exception.DMakerException;
 import com.example.dmaker.repository.DeveloperRepository;
 import com.example.dmaker.type.DeveloperLevel;
 import com.example.dmaker.type.DeveloperSkillType;
@@ -11,6 +13,11 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.transaction.Transactional;
+
+import java.util.Optional;
+
+import static com.example.dmaker.exception.DMakerErrorCode.DUPLICATED_MEMBER_ID;
+import static com.example.dmaker.exception.DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +38,9 @@ public class DMakerService {
 
     @Transactional
     public void createDeveloper(CreateDeveloper.Request request) {
+
+        validateCreateDeveloperRequest(request);
+
         Developer developer = Developer.builder()
                 .developerLevel(DeveloperLevel.JUNIOR)
                 .developerSkillType(DeveloperSkillType.FRONT_END)
@@ -41,6 +51,39 @@ public class DMakerService {
 
         developerRepository.save(developer);
     }
+
+    private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+        // buisness validation 을 수행하
+
+        DeveloperLevel developerLevel = request.getDeveloperLevel();
+        Integer experienceYears = request.getExperienceYears();
+
+        if(developerLevel == DeveloperLevel.SENIOR
+            && experienceYears < 10) {
+
+            // 예외를 던질 때는 다양한 Exception 들을 날릴 수 있지만, 이렇게 커스텀 Exception 날려주는 게 좋다.
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+
+        if(developerLevel == DeveloperLevel.JUNGNIOR
+            && (experienceYears < 4 || experienceYears > 10)) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+
+        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+
+        // 원래라면 아래와 같이 하나하나 코드를 작업해줘야 했지만 자바 8 이후부터는 주석 해제된 코드처럼 사용할 수 있다.
+//        Optional<Developer> developer = developerRepository.findByMemberId(request.getMemberId());
+//        if(developer.isPresent()) throw new DMakerException(DUPLICATED_MEMBER_ID);
+
+        developerRepository.findByMemberId(request.getMemberId())
+                .ifPresent((developer -> {
+                    throw new DMakerException(DUPLICATED_MEMBER_ID);
+                }));
+    }
+
 
     // 위의 트랜잭션은 사실 아래의 코드와 같이 작동한다.
     // em 은 추상화된 db라고 생각하면 된다
@@ -84,6 +127,5 @@ public class DMakerService {
         // 현재 트랜잭션은 공통된 구현부가 존재한다
         // [1] 시작점 [2] 종료점 [3] 에러
         // 이런 것들을 AOP 로 구현 => 그게 Transactional 어노테이션.
-
     }
 }
