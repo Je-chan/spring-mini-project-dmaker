@@ -1,13 +1,12 @@
 package com.example.dmaker.controller;
 
 import com.example.dmaker.dto.CreateDeveloper;
+import com.example.dmaker.dto.DeveloperDetailDto;
+import com.example.dmaker.dto.DeveloperDto;
 import com.example.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -21,11 +20,23 @@ import java.util.List;
 public class DMakerController {
     private final DMakerService dMakerService;
 
+    // API 응답으로 Entity (Developer) 를 그대로 내려주는 것은 안티 패턴
+    // DTO 를 통해서 Entity 와 응답 내려주는 것을 서로 분리 해주는 것이 매우 좋은 방식이 된다.
     @GetMapping("/developers")
-    public List<String> getAllDevelopers() {
+    public List<DeveloperDto> getAllDevelopers() {
         log.info("GET /developers HTTP/1.1");
 
-        return Arrays.asList("je", "Liebe", "Bono");
+        return dMakerService.getAllDevelopers();
+    }
+
+    @GetMapping("/developers/{memberId}")
+    public DeveloperDetailDto getDeveloperDetail(
+            @PathVariable String memberId
+    ) {
+        log.info("GET /developers HTTP/1.1");
+
+        return dMakerService.getDeveloperDetail(memberId);
+
     }
 
     @PostMapping("/create-developer")

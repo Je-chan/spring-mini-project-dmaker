@@ -1,12 +1,12 @@
 ### Send POST request with json body
-POST https://localhost:8080/create-developer
+POST http://localhost:8080/create-developer
 Content-Type: application/json
 
 {
   "developerLevel": "JUNIOR",
   "developerSkillType": "FRONT_END",
   "experienceYears": 3,
-  "memberId": "Je",
-  "name": "Liebe",
+  "memberId": "good",
+  "name": "Gogo",
   "age": 20
 }

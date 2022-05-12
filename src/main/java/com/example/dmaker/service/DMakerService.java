@@ -1,6 +1,8 @@
 package com.example.dmaker.service;
 
 import com.example.dmaker.dto.CreateDeveloper;
+import com.example.dmaker.dto.DeveloperDetailDto;
+import com.example.dmaker.dto.DeveloperDto;
 import com.example.dmaker.entity.Developer;
 import com.example.dmaker.exception.DMakerErrorCode;
 import com.example.dmaker.exception.DMakerException;
@@ -14,10 +16,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.transaction.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static com.example.dmaker.exception.DMakerErrorCode.DUPLICATED_MEMBER_ID;
-import static com.example.dmaker.exception.DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED;
+import static com.example.dmaker.exception.DMakerErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -132,5 +135,19 @@ public class DMakerService {
         // 현재 트랜잭션은 공통된 구현부가 존재한다
         // [1] 시작점 [2] 종료점 [3] 에러
         // 이런 것들을 AOP 로 구현 => 그게 Transactional 어노테이션.
+    }
+
+    public List<DeveloperDto> getAllDevelopers() {
+        return developerRepository.findAll()
+                .stream().map(DeveloperDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public DeveloperDetailDto getDeveloperDetail(String memberId) {
+        return developerRepository.findByMemberId(memberId)
+                .map(DeveloperDetailDto::fromEntity)
+                // orElseThrow 는 null 값 나왔을 때의 예외 처리
+                .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+
     }
 }

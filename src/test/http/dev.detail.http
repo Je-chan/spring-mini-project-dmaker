@@ -1,0 +1,2 @@
+GET http://localhost:8080/developers/liebe
+Content-Type: application/json
