@@ -37,19 +37,26 @@ public class DMakerService {
     private final DeveloperRepository developerRepository;
 
     @Transactional
-    public void createDeveloper(CreateDeveloper.Request request) {
+    public CreateDeveloper.Response createDeveloper(CreateDeveloper.Request request) {
 
         validateCreateDeveloperRequest(request);
 
         Developer developer = Developer.builder()
-                .developerLevel(DeveloperLevel.JUNIOR)
-                .developerSkillType(DeveloperSkillType.FRONT_END)
-                .experienceYear(1)
-                .name("Je")
-                .age(20)
+                .developerLevel(request.getDeveloperLevel())
+                .developerSkillType(request.getDeveloperSkillType())
+                .experienceYear(request.getExperienceYears())
+                .memberId(request.getMemberId())
+                .name(request.getName())
+                .age(request.getAge())
                 .build();
 
         developerRepository.save(developer);
+
+        // Response DTO 를 만들 때는 developer 를 생성한 직후에 그 developer 의 entity 로 만들어주기에 강한 결합을 하게 된다
+        // 그럴 때는 developer 받아서 return 해주는 static 메소드를 만들어주는 것이 현명한 방법이 된다
+//        return CreateDeveloper.Response();
+        return CreateDeveloper.Response.fromEntity(developer);
+
     }
 
     private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
@@ -69,7 +76,6 @@ public class DMakerService {
             && (experienceYears < 4 || experienceYears > 10)) {
             throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
-
         if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
             throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
@@ -77,7 +83,6 @@ public class DMakerService {
         // 원래라면 아래와 같이 하나하나 코드를 작업해줘야 했지만 자바 8 이후부터는 주석 해제된 코드처럼 사용할 수 있다.
 //        Optional<Developer> developer = developerRepository.findByMemberId(request.getMemberId());
 //        if(developer.isPresent()) throw new DMakerException(DUPLICATED_MEMBER_ID);
-
         developerRepository.findByMemberId(request.getMemberId())
                 .ifPresent((developer -> {
                     throw new DMakerException(DUPLICATED_MEMBER_ID);
