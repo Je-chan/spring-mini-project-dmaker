@@ -52,9 +52,10 @@ public class DMakerController {
 
     @PutMapping("/developer/{memberId}")
     public DeveloperDetailDto editDeveloper(
+            @PathVariable String memberId,
             @Valid @RequestBody EditDeveloper.Request request
     ) {
 
-        return dMakerService.editDeveloper(memberId)
+        return dMakerService.editDeveloper(memberId, request);
     }
 }
