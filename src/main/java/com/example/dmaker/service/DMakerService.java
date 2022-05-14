@@ -3,6 +3,7 @@ package com.example.dmaker.service;
 import com.example.dmaker.dto.CreateDeveloper;
 import com.example.dmaker.dto.DeveloperDetailDto;
 import com.example.dmaker.dto.DeveloperDto;
+import com.example.dmaker.dto.EditDeveloper;
 import com.example.dmaker.entity.Developer;
 import com.example.dmaker.exception.DMakerErrorCode;
 import com.example.dmaker.exception.DMakerException;
@@ -68,20 +69,7 @@ public class DMakerService {
         DeveloperLevel developerLevel = request.getDeveloperLevel();
         Integer experienceYears = request.getExperienceYears();
 
-        if(developerLevel == DeveloperLevel.SENIOR
-            && experienceYears < 10) {
-
-            // 예외를 던질 때는 다양한 Exception 들을 날릴 수 있지만, 이렇게 커스텀 Exception 날려주는 게 좋다.
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-
-        if(developerLevel == DeveloperLevel.JUNGNIOR
-            && (experienceYears < 4 || experienceYears > 10)) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
+        validateDeveloperLevel(developerLevel, experienceYears);
 
         // 원래라면 아래와 같이 하나하나 코드를 작업해줘야 했지만 자바 8 이후부터는 주석 해제된 코드처럼 사용할 수 있다.
 //        Optional<Developer> developer = developerRepository.findByMemberId(request.getMemberId());
@@ -149,5 +137,47 @@ public class DMakerService {
                 // orElseThrow 는 null 값 나왔을 때의 예외 처리
                 .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
 
+    }
+
+    @Transactional
+    public DeveloperDetailDto editDeveloper(String memberId, EditDeveloper.Request request) {
+        validateEditDeveloperRequest(request, memberId);
+
+        Developer developer = developerRepository.findByMemberId(memberId).orElseThrow(
+                () -> new DMakerException(NO_DEVELOPER)
+        );
+
+        developer.setDeveloperLevel(request.getDeveloperLevel());
+        developer.setDeveloperSkillType(request.getDeveloperSkillType());
+        developer.setExperienceYear(request.getExperienceYears());
+
+        return DeveloperDetailDto.fromEntity(developer);
+    }
+
+    private void validateEditDeveloperRequest(EditDeveloper.Request request, String memberId) {
+
+        DeveloperLevel developerLevel = request.getDeveloperLevel();
+        Integer experienceYears = request.getExperienceYears();
+
+        validateDeveloperLevel(developerLevel, experienceYears);
+
+
+    }
+
+    private void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
+        if(developerLevel == DeveloperLevel.SENIOR
+                && experienceYears < 10) {
+
+            // 예외를 던질 때는 다양한 Exception 들을 날릴 수 있지만, 이렇게 커스텀 Exception 날려주는 게 좋다.
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+
+        if(developerLevel == DeveloperLevel.JUNGNIOR
+                && (experienceYears < 4 || experienceYears > 10)) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
     }
 }

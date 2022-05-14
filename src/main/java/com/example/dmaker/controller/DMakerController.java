@@ -3,6 +3,7 @@ package com.example.dmaker.controller;
 import com.example.dmaker.dto.CreateDeveloper;
 import com.example.dmaker.dto.DeveloperDetailDto;
 import com.example.dmaker.dto.DeveloperDto;
+import com.example.dmaker.dto.EditDeveloper;
 import com.example.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class DMakerController {
         return dMakerService.getAllDevelopers();
     }
 
-    @GetMapping("/developers/{memberId}")
+    @GetMapping("/developer/{memberId}")
     public DeveloperDetailDto getDeveloperDetail(
             @PathVariable String memberId
     ) {
@@ -47,5 +48,13 @@ public class DMakerController {
         log.info("request : {}", request);
 
         return dMakerService.createDeveloper(request);
+    }
+
+    @PutMapping("/developer/{memberId}")
+    public DeveloperDetailDto editDeveloper(
+            @Valid @RequestBody EditDeveloper.Request request
+    ) {
+
+        return dMakerService.editDeveloper(memberId)
     }
 }
