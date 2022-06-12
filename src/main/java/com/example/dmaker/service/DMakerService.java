@@ -81,6 +81,9 @@ public class DMakerService {
                 .ifPresent((developer -> {
                     throw new DMakerException(DUPLICATED_MEMBER_ID);
                 }));
+
+        // Internal Servcer Error 를 확인해보기 위한 코드
+//        throw new ArrayIndexOutOfBoundsException();
     }
 
 

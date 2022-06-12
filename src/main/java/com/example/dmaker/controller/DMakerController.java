@@ -1,16 +1,21 @@
 package com.example.dmaker.controller;
 
 import com.example.dmaker.dto.*;
+import com.example.dmaker.exception.DMakerErrorCode;
 import com.example.dmaker.exception.DMakerException;
 import com.example.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
+
+import static com.example.dmaker.exception.DMakerErrorCode.INVALID_REQUEST;
 
 // 실제로 스프링에서 동작할 Bean 으로 등록
 @RestController
@@ -77,5 +82,4 @@ public class DMakerController {
                 .build();
 
     }
-
 }
