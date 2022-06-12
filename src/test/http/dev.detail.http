@@ -1,2 +1,2 @@
-GET http://localhost:8080/developers/liebe
+GET http://localhost:8080/developer/good
 Content-Type: application/json
