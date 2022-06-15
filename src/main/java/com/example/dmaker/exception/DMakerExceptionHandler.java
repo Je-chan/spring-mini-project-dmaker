@@ -52,7 +52,6 @@ public class DMakerExceptionHandler {
 
     }
 
-
     @ExceptionHandler(value = {
             // 상정하지 못한 에러가 있는 경우가 있으므로 그 때는 Exception.class 로 날릴 수는 있지만 추적해서 상세하게 내용을 담아주는 것이 좋다
             Exception.class
