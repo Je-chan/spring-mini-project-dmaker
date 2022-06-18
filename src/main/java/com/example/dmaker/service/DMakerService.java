@@ -66,7 +66,7 @@ public class DMakerService {
 
     }
 
-    private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+    public void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
         // buisness validation 을 수행하
 
         DeveloperLevel developerLevel = request.getDeveloperLevel();

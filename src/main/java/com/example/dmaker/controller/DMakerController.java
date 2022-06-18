@@ -49,6 +49,7 @@ public class DMakerController {
             @Valid @RequestBody CreateDeveloper.Request request
     ) {
 
+        dMakerService.validateCreateDeveloperRequest(request);
         log.info("request : {}", request);
 
         return dMakerService.createDeveloper(request);
