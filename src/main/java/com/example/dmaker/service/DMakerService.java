@@ -65,42 +65,20 @@ public class DMakerService {
 
     }
 
-    public DeveloperValidationDto validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+    private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
 
-        DeveloperValidationDto developerValidationDto = null;
-
-        DeveloperLevel developerLevel = request.getDeveloperLevel();
-        Integer experienceYears = request.getExperienceYears();
-
-        validateDeveloperLevel(developerLevel, experienceYears);
+        validateDeveloperLevel(
+                request.getDeveloperLevel(),
+                request.getExperienceYears());
 
         // 원래라면 아래와 같이 하나하나 코드를 작업해줘야 했지만 자바 8 이후부터는 주석 해제된 코드처럼 사용할 수 있다.
 //        Optional<Developer> developer = developerRepository.findByMemberId(request.getMemberId());
 //        if(developer.isPresent()) throw new DMakerException(DUPLICATED_MEMBER_ID);
 
-        try{
-            if(developerRepository.findByMemberId(request.getMemberId()).isPresent()) {
-                developerValidationDto = new DeveloperValidationDto(
-                        DUPLICATED_MEMBER_ID,
-                        DUPLICATED_MEMBER_ID.getMessage()
-                );
-            }
-        } catch(Exception e) {
-            log.error(e.getMessage(), e);
-            developerValidationDto = new DeveloperValidationDto(
-                    INTERNAL_SERVER_ERROR,
-                    INTERNAL_SERVER_ERROR.getMessage()
-            );
-        }
-
-//                .ifPresent((developer -> {
-//                    throw new DMakerException(DUPLICATED_MEMBER_ID);
-//                }));
-
-        // Internal Servcer Error 를 확인해보기 위한 코드
-        // throw new ArrayIndexOutOfBoundsException();
-
-        return developerValidationDto;
+        developerRepository.findByMemberId(request.getMemberId())
+                .ifPresent((developer -> {
+                    throw new DMakerException(DUPLICATED_MEMBER_ID);
+                }));
     }
 
 
@@ -187,22 +165,20 @@ public class DMakerService {
 
     }
 
-    private DeveloperValidationDto validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
+    private void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
         if(developerLevel == DeveloperLevel.SENIOR
                 && experienceYears < 10) {
-            return new DeveloperValidationDto(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED,
-                    LEVEL_EXPERIENCE_YEARS_NOT_MATCHED.getMessage());
             // 예외를 던질 때는 다양한 Exception 들을 날릴 수 있지만, 이렇게 커스텀 Exception 날려주는 게 좋다.
-//            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
 
-//        if(developerLevel == DeveloperLevel.JUNGNIOR
-//                && (experienceYears < 4 || experienceYears > 10)) {
-//            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-//        }
-//        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-//            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-//        }
+        if(developerLevel == DeveloperLevel.JUNGNIOR
+                && (experienceYears < 4 || experienceYears > 10)) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
     }
 
     @Transactional
