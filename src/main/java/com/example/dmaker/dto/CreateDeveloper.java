@@ -1,6 +1,7 @@
 package com.example.dmaker.dto;
 
 import com.example.dmaker.entity.Developer;
+import com.example.dmaker.exception.DMakerErrorCode;
 import com.example.dmaker.type.DeveloperLevel;
 import com.example.dmaker.type.DeveloperSkillType;
 import lombok.*;
@@ -52,6 +53,9 @@ public class CreateDeveloper {
         private DeveloperSkillType developerSkillType;
         private Integer experienceYears;
         private String memberId;
+
+        private DMakerErrorCode errorCode;
+        private String errorMsg;
 
         public static Response fromEntity(Developer developer) {
             return Response.builder()

@@ -1,10 +1,7 @@
 package com.example.dmaker.service;
 
 import com.example.dmaker.code.StatusCode;
-import com.example.dmaker.dto.CreateDeveloper;
-import com.example.dmaker.dto.DeveloperDetailDto;
-import com.example.dmaker.dto.DeveloperDto;
-import com.example.dmaker.dto.EditDeveloper;
+import com.example.dmaker.dto.*;
 import com.example.dmaker.entity.Developer;
 import com.example.dmaker.entity.RetiredDeveloper;
 import com.example.dmaker.exception.DMakerException;
@@ -13,6 +10,7 @@ import com.example.dmaker.repository.RetiredDeveloperRepository;
 import com.example.dmaker.type.DeveloperLevel;
 import com.example.dmaker.type.DeveloperSkillType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -24,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static com.example.dmaker.exception.DMakerErrorCode.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DMakerService {
@@ -66,8 +65,9 @@ public class DMakerService {
 
     }
 
-    public void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
-        // buisness validation 을 수행하
+    public DeveloperValidationDto validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+
+        DeveloperValidationDto developerValidationDto = null;
 
         DeveloperLevel developerLevel = request.getDeveloperLevel();
         Integer experienceYears = request.getExperienceYears();
@@ -77,13 +77,30 @@ public class DMakerService {
         // 원래라면 아래와 같이 하나하나 코드를 작업해줘야 했지만 자바 8 이후부터는 주석 해제된 코드처럼 사용할 수 있다.
 //        Optional<Developer> developer = developerRepository.findByMemberId(request.getMemberId());
 //        if(developer.isPresent()) throw new DMakerException(DUPLICATED_MEMBER_ID);
-        developerRepository.findByMemberId(request.getMemberId())
-                .ifPresent((developer -> {
-                    throw new DMakerException(DUPLICATED_MEMBER_ID);
-                }));
+
+        try{
+            if(developerRepository.findByMemberId(request.getMemberId()).isPresent()) {
+                developerValidationDto = new DeveloperValidationDto(
+                        DUPLICATED_MEMBER_ID,
+                        DUPLICATED_MEMBER_ID.getMessage()
+                );
+            }
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            developerValidationDto = new DeveloperValidationDto(
+                    INTERNAL_SERVER_ERROR,
+                    INTERNAL_SERVER_ERROR.getMessage()
+            );
+        }
+
+//                .ifPresent((developer -> {
+//                    throw new DMakerException(DUPLICATED_MEMBER_ID);
+//                }));
 
         // Internal Servcer Error 를 확인해보기 위한 코드
-//        throw new ArrayIndexOutOfBoundsException();
+        // throw new ArrayIndexOutOfBoundsException();
+
+        return developerValidationDto;
     }
 
 
@@ -170,21 +187,22 @@ public class DMakerService {
 
     }
 
-    private void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
+    private DeveloperValidationDto validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
         if(developerLevel == DeveloperLevel.SENIOR
                 && experienceYears < 10) {
-
+            return new DeveloperValidationDto(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED,
+                    LEVEL_EXPERIENCE_YEARS_NOT_MATCHED.getMessage());
             // 예외를 던질 때는 다양한 Exception 들을 날릴 수 있지만, 이렇게 커스텀 Exception 날려주는 게 좋다.
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+//            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
 
-        if(developerLevel == DeveloperLevel.JUNGNIOR
-                && (experienceYears < 4 || experienceYears > 10)) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
+//        if(developerLevel == DeveloperLevel.JUNGNIOR
+//                && (experienceYears < 4 || experienceYears > 10)) {
+//            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+//        }
+//        if(developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+//            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+//        }
     }
 
     @Transactional

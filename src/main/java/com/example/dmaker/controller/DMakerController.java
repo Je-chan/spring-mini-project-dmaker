@@ -49,8 +49,15 @@ public class DMakerController {
             @Valid @RequestBody CreateDeveloper.Request request
     ) {
 
-        dMakerService.validateCreateDeveloperRequest(request);
         log.info("request : {}", request);
+        DeveloperValidationDto developerValidationDto = dMakerService.validateCreateDeveloperRequest(request);
+
+        if(developerValidationDto != null) {
+            CreateDeveloper.Response.builder()
+                    .errorCode(developerValidationDto.getErrorCode())
+                    .errorMsg(developerValidationDto.getErrorMsg())
+                    .build();
+        }
 
         return dMakerService.createDeveloper(request);
     }
